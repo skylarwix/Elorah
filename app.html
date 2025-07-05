@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elorah | Dropshipping Store</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    :root {
+      --primary: #6d8a49;
+      --secondary: #615b56;
+      --background: #F5F2EE;
+      --text: #4a4040;
+      --white: #ffffff;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--background);
+      color: var(--text);
+    }
+    header {
+      background: var(--white);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+    }
+    .logo img {
+      height: 50px;
+    }
+    nav a {
+      margin: 0 1rem;
+      text-decoration: none;
+      color: var(--text);
+    }
+    nav a:hover {
+      color: var(--primary);
+    }
+    .hero {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: var(--secondary);
+      color: var(--white);
+    }
+    .hero h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .backgnd{
+        width: 300px;
+    }
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      padding: 2rem;
+    }
+    .product {
+      background: var(--white);
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      text-align: center;
+    }
+    .product img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    .product h3 {
+      margin: 1rem 0 0.5rem;
+    }
+    .product button {
+      background: var(--primary);
+      color: var(--white);
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .product button:hover {
+      background: var(--secondary);
+    }
+    .cart {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: var(--white);
+      border: 1px solid #ccc;
+      padding: 1rem;
+      border-radius: 8px;
+      width: 300px;
+      max-height: 400px;
+      overflow-y: auto;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      display: none;
+    }
+    .cart h3 {
+      margin-top: 0;
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+    .cart-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: var(--primary);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      background: var(--white);
+      font-size: 0.9rem;
+    }
+    section {
+      scroll-margin-top: 80px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="skincareimg/elorah.png" alt="Elorah Logo" />
+    </div>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#products">Products</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <section class="hero" id="home">
+    <img src="skincareimg/elorah.png" alt="" class="backgnd">
+  </section>
+
+  <section class="products" id="products">
+    <!-- Products will be loaded from Shopify Storefront API -->
+  </section>
+
+  <section id="about" style="padding: 2rem; text-align: center;">
+    <h2>About Elorah</h2>
+    <p>Elorah is a modern online brand that curates stylish and practical products for everyday living. We believe in quality, affordability, and customer-first service.</p>
+  </section>
+
+  <section id="contact" style="padding: 2rem; text-align: center;">
+    <h2>Contact Us</h2>
+    <p>Email us at <a href="mailto:support@elorah.com">support@elorah.com</a></p>
+  </section>
+
+  <div class="cart-toggle" onclick="toggleCart()">🛒 Cart (<span id="cart-count">0</span>)</div>
+  <div class="cart" id="cart">
+    <h3>Your Cart</h3>
+    <div id="cart-items"></div>
+    <p><strong>Total:</strong> <span id="cart-total">$0.00</span></p>
+    <button onclick="checkout()">Checkout</button>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 Elorah. All rights reserved.</p>
+  </footer>
+
+  <!-- Shopify Storefront API Integration -->
+  <script>
+    const SHOP_DOMAIN = 'your-shop-name.myshopify.com';
+    const STOREFRONT_ACCESS_TOKEN = 'your-storefront-access-token';
+
+    let cart = [];
+
+    function toggleCart() {
+      const cartBox = document.getElementById('cart');
+      cartBox.style.display = cartBox.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function updateCartDisplay() {
+      const cartItemsEl = document.getElementById('cart-items');
+      const cartTotalEl = document.getElementById('cart-total');
+      const cartCountEl = document.getElementById('cart-count');
+      let total = 0;
+      cartItemsEl.innerHTML = '';
+      cart.forEach(item => {
+        total += parseFloat(item.price);
+        cartItemsEl.innerHTML += `<div class="cart-item"><span>${item.title}</span><span>$${item.price}</span></div>`;
+      });
+      cartCountEl.textContent = cart.length;
+      cartTotalEl.textContent = `$${total.toFixed(2)}`;
+    }
+
+    function addToCart(title, price) {
+      cart.push({ title, price });
+      updateCartDisplay();
+    }
+
+    function checkout() {
+      alert('Redirecting to Shopify checkout... (integration needed)');
+      // Real checkout would redirect to Shopify Checkout URL
+    }
+
+    const query = `{
+      products(first: 6) {
+        edges {
+          node {
+            id
+            title
+            description
+            images(first: 1) {
+              edges {
+                node {
+                  url
+                }
+              }
+            }
+            variants(first: 1) {
+              edges {
+                node {
+                  price {
+                    amount
+                    currencyCode
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }`;
+
+    fetch(`https://${SHOP_DOMAIN}/api/2024-04/graphql.json`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Storefront-Access-Token': STOREFRONT_ACCESS_TOKEN,
+      },
+      body: JSON.stringify({ query })
+    })
+    .then(res => res.json())
+    .then(data => {
+      const products = data.data.products.edges;
+      const container = document.querySelector('.products');
+      container.innerHTML = '';
+      products.forEach(({ node }) => {
+        const price = node.variants.edges[0].node.price;
+        container.innerHTML += `
+          <div class="product">
+            <img src="${node.images.edges[0]?.node.url}" alt="${node.title}" />
+            <h3>${node.title}</h3>
+            <p>${price.amount} ${price.currencyCode}</p>
+            <button onclick="addToCart('${node.title}', '${price.amount}')">Add to Cart</button>
+          </div>
+        `;
+      });
+    })
+    .catch(error => console.error('Error fetching products:', error));
+  </script>
+</body>
+</html>
